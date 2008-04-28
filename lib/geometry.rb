@@ -3,7 +3,7 @@
 # Used so I can use spiffy RMagick geometry strings with ImageScience
 class Geometry
   # ! and @ are removed until support for them is added
-  FLAGS = ['', '%', '<', '>']#, '!', '@']
+  FLAGS = ['', '%', '<', '>', '!']#, '@']
   RFLAGS = { '%' => :percent,
              '!' => :aspect,
              '<' => :>,
@@ -38,13 +38,14 @@ class Geometry
   end
 
   # Convert object to a geometry string
+  # http://deepcalm.com/writing/cropped-thumbnails-in-attachment-fu-using-imagescience/
   def to_s
     str = ''
     str << "%g" % @width if @width > 0
     str << 'x' if (@width > 0 || @height > 0)
     str << "%g" % @height if @height > 0
     str << "%+d%+d" % [@x, @y] if (@x != 0 || @y != 0)
-    str << FLAGS[@flag.to_i]
+    str << RFLAGS.index(@flag)
   end
   
   # attempts to get new dimensions for the current geometry string given these old dimensions.
@@ -54,6 +55,9 @@ class Geometry
     new_height = orig_height
 
     case @flag
+      when  :aspect
+        new_width = @width unless @width.nil?
+        new_height = @height unless @height.nil?
       when :percent
         scale_x = @width.zero?  ? 100 : @width
         scale_y = @height.zero? ? @width : @height
